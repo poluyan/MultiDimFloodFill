@@ -18,23 +18,25 @@ void b4MultipleGrids(std::vector<double> init_point)
 {
     size_t dim = init_point.size();
 
-    std::vector<double> gridN = {100, 100};
-    std::vector<std::vector<double>> grids(gridN.size());
-    std::vector<double> dx(gridN.size());
+    std::vector<double> grid = {100, 100};
+    std::vector<std::vector<double>> grids(grid.size());
+    std::vector<double> dx(grid.size());
+    
+    double lb = -3, ub = 3;
 
     for(size_t i = 0; i != grids.size(); i++)
     {
-        size_t grid_N = gridN[i];
-        std::vector<double> grid(grid_N + 1);
-        double startp = -3;
-        double endp = 3;
+        size_t num_points = grid[i];
+        std::vector<double> onegrid(num_points + 1);
+        double startp = lb;
+        double endp = ub;
         double es = endp - startp;
-        for(size_t j = 0; j != grid.size(); j++)
+        for(size_t j = 0; j != onegrid.size(); j++)
         {
-            grid[j] = startp + j*es/(grid_N);
+            onegrid[j] = startp + j*es/(num_points);
         }
         grids[i] = grid;
-        dx[i] = es/(grid_N*2);
+        dx[i] = es/(num_points*2);
     }
 }
 
