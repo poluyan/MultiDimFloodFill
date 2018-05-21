@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <vector>
 #include <cmath>
+#include <set>
 
 template <typename T>
 T pdf(std::vector<T> x)
