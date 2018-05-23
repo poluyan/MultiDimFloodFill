@@ -15,6 +15,67 @@ T pdf(std::vector<T> x)
     return rez;
 }
 
+void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
+                                        std::vector<std::vector<int>> &points,
+                                        std::set<std::vector<int>> &visited,
+                                        std::vector<std::vector<double>> &samples,
+                                        std::vector<double> dx,
+                                        size_t &counter,
+                                        size_t &fe_count)
+{
+    while(!points.empty())
+    {
+        auto t = points.back();
+        points.pop_back();
+
+        auto it = visited.find(t);
+        if(!(it == visited.end()))
+        {
+            counter++;
+            continue;
+        }
+        visited.insert(t);
+
+        std::vector<double> dot(t.size());
+
+        for(size_t i = 0; i != dot.size(); i++)
+        {
+            dot[i] = grids[i][t[i]] + dx[i];
+        }
+
+        double val = pdf(dot);
+        fe_count++;
+
+        if(val > 1.0)
+        {
+            std::vector<int> point = t;
+
+            samples.push_back(dot);
+
+            for(size_t i = 0; i != t.size(); i++)
+            {
+                point = t;
+                point[i] = point[i] + 1;
+
+                if(point[i] < 0 || point[i] > grids[i].size() - 1)
+                    continue;
+
+                points.push_back(point);
+            }
+            for(size_t i = 0; i != t.size(); i++)
+            {
+                point = t;
+                point[i] = point[i] - 1;
+
+                if(point[i] < 0 || point[i] > grids[i].size() - 1)
+                    continue;
+
+                points.push_back(point);
+            }
+        }
+    }
+}
+
 void b4MultipleGrids(std::vector<double> init_point)
 {
     size_t dim = init_point.size();
@@ -59,6 +120,13 @@ void b4MultipleGrids(std::vector<double> init_point)
 
     size_t counter = 0;
     size_t fe_count = 0;
+
+    FloodFill_MultipleGrids_VonNeumann(grids, points, visited, samples, dx, counter, fe_count);
+
+    std::cout << counter << std::endl;
+    std::cout << "fe count: " << fe_count << std::endl;
+    std::cout << "samples: " << samples.size() << std::endl;
+    std::cout << samples.size()/double(fe_count) << std::endl;
 
 }
 
