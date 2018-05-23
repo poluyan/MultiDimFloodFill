@@ -5,12 +5,56 @@
 #include <set>
 #include <fstream>
 #include <string>
-#include <unordered_map>
 #include "timer.h"
+
+size_t grid_sizes = 11;
+size_t dimension = 8;
+
+const int alpha_size = 7;
+struct TrieNode
+{
+    struct TrieNode *children[alpha_size];
+    bool isEndOfWord;
+};
+
+TrieNode *getNode()
+{
+    TrieNode *pNode =  new TrieNode;
+    pNode->isEndOfWord = false;
+    for(int i = 0; i < alpha_size; i++)
+        pNode->children[i] = 0;
+    return pNode;
+}
+
+void insert(struct TrieNode *root, std::vector<int> key)
+{
+    struct TrieNode *pCrawl = root;
+    for(int i = 0; i < key.size(); i++)
+    {
+        int index = key[i];
+        if(!pCrawl->children[index])
+            pCrawl->children[index] = getNode();
+        pCrawl = pCrawl->children[index];
+    }
+    pCrawl->isEndOfWord = true;
+}
+
+bool search(struct TrieNode *root, std::vector<int> key)
+{
+    struct TrieNode *pCrawl = root;
+    for(int i = 0; i < key.size(); i++)
+    {
+        int index = key[i];
+        if(!pCrawl->children[index])
+            return false;
+        pCrawl = pCrawl->children[index];
+    }
+    return (pCrawl != NULL && pCrawl->isEndOfWord);
+}
 
 template <typename T>
 bool pdf(std::vector<T> x)
-{  
+{
     T rez1 = 0, rez2 = 0;
     for(auto i : x)
     {
@@ -25,15 +69,15 @@ void print2file2d(std::string fname, std::vector<std::vector<T> > u)
 {
     std::ofstream fOut;
     fOut.open(fname.c_str());
-    if (!fOut.is_open())
+    if(!fOut.is_open())
     {
         std::cout << "Error opening file." << std::endl;
         return;
     }
     fOut.precision(10);
-    for (size_t i = 0; i < u.size(); i++)
+    for(size_t i = 0; i < u.size(); i++)
     {
-        for (size_t j = 0; j < u[i].size(); j++)
+        for(size_t j = 0; j < u[i].size(); j++)
         {
             fOut << std::scientific << u[i][j] << '\t';
         }
@@ -55,7 +99,8 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
     {
         auto t = points.back();
         points.pop_back();
-        
+
+        std::string s(t.begin(), t.end());
         auto it = visited.find(t);
         if(!(it == visited.end()))
         {
@@ -101,33 +146,26 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
         }
     }
 }
-typedef std::pair<std::string,std::string> Name;
-size_t name_hash( const Name & name )
-{
-    return std::hash<std::string>()(name.first) ^ std::hash<std::string>()(name.second);
-}
-void FloodFill_MultipleGrids_VonNeumann_m(std::vector<std::vector<double>>& grids,
-                                        std::vector<std::vector<int>> &points,
-                                        std::unordered_map<Name,int,decltype(&name_hash)> &visited,
-                                        std::vector<std::vector<double>> &samples,
-                                        std::vector<double> dx,
-                                        size_t &counter,
-                                        size_t &fe_count)
+
+void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& grids,
+        std::vector<std::vector<int>> &points,
+        struct TrieNode *visited,
+        std::vector<std::vector<double>> &samples,
+        std::vector<double> dx,
+        size_t &counter,
+        size_t &fe_count)
 {
     while(!points.empty())
     {
         auto t = points.back();
         points.pop_back();
-        
-        std::string s(t.begin(), t.end());
-        auto it = visited.find(Name(s, ""));
-        if(!(it == visited.end()))
+
+        if(search(visited,t))
         {
             counter++;
             continue;
         }
-        //visited.insert(std::make_pair<std::string,int>(s.c_str(),0));
-        visited[Name(s, "")] = 0;
+        insert(visited,t);
 
         std::vector<double> dot(t.size());
         for(size_t i = 0; i != dot.size(); i++)
@@ -171,7 +209,7 @@ void b4MultipleGrids(std::vector<double> init_point)
 {
     size_t dim = init_point.size();
 
-    std::vector<double> grid = {1000, 1000};
+    std::vector<double> grid(dim, grid_sizes);
     std::vector<std::vector<double>> grids(grid.size());
     std::vector<double> dx(grid.size());
 
@@ -222,15 +260,15 @@ void b4MultipleGrids(std::vector<double> init_point)
     std::cout << "fe count: " << fe_count << std::endl;
     std::cout << "samples: " << samples.size() << std::endl;
     std::cout << samples.size()/double(fe_count) << std::endl;
-    
+
     //print2file2d("maps/sample2d.dat", samples);
 }
 
-void b4MultipleGrids_m(std::vector<double> init_point)
+void b4MultipleGrids_trie(std::vector<double> init_point)
 {
     size_t dim = init_point.size();
 
-    std::vector<double> grid = {1000, 1000};
+    std::vector<double> grid(dim, grid_sizes);
     std::vector<std::vector<double>> grids(grid.size());
     std::vector<double> dx(grid.size());
 
@@ -268,30 +306,34 @@ void b4MultipleGrids_m(std::vector<double> init_point)
 
     points.push_back(startdot);
 
-    std::unordered_map<Name,int,decltype(&name_hash)> visited;
+    TrieNode *visited = getNode();
 
     std::vector<std::vector<double> > samples;
 
     size_t counter = 0;
     size_t fe_count = 0;
 
-    FloodFill_MultipleGrids_VonNeumann_m(grids, points, visited, samples, dx, counter, fe_count);
+    FloodFill_MultipleGrids_VonNeumann_trie(grids, points, visited, samples, dx, counter, fe_count);
 
     std::cout << counter << std::endl;
     std::cout << "fe count: " << fe_count << std::endl;
     std::cout << "samples: " << samples.size() << std::endl;
     std::cout << samples.size()/double(fe_count) << std::endl;
-    
+
     //print2file2d("maps/sample2d.dat", samples);
 }
 
 int main()
 {
-    std::vector<double> start = {0, 0};
-    
+    size_t dim = dimension;
+    std::vector<double> start(dim, -1);
+
     Timer time_cpp11;
+    
     time_cpp11.reset();
-    //b4MultipleGrids(start);
-    b4MultipleGrids_m(start);
+    b4MultipleGrids(start);
+    std::cout << time_cpp11.elapsed_seconds() << std::endl;
+    time_cpp11.reset();
+    b4MultipleGrids_trie(start);
     std::cout << time_cpp11.elapsed_seconds() << std::endl;
 }
