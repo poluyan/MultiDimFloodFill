@@ -4,6 +4,7 @@
 #include <cmath>
 #include <set>
 #include <fstream>
+#include "timer.h"
 
 template <typename T>
 bool pdf(std::vector<T> x)
