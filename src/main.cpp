@@ -155,7 +155,7 @@ void b4MultipleGrids(std::vector<double> init_point)
     std::cout << "samples: " << samples.size() << std::endl;
     std::cout << samples.size()/double(fe_count) << std::endl;
     
-    print2file2d("maps/samples.dat", samples);
+    //print2file2d("maps/sample2d.dat", samples);
 }
 
 int main()
