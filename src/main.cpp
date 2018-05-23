@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <set>
+#include <fstream>
 
 template <typename T>
 T pdf(std::vector<T> x)
@@ -12,6 +13,29 @@ T pdf(std::vector<T> x)
         rez += std::pow(i, 2.0);
 
     return std::sqrt(rez) < 2 ? 1 : 0;
+}
+
+template <typename T>
+void print2file2d(std::string fname, std::vector<std::vector<T> > u)
+{
+    std::ofstream fOut;
+    fOut.open(fname.c_str());
+    if (!fOut.is_open())
+    {
+        std::cout << "Error opening file." << std::endl;
+        return;
+    }
+    fOut.precision(10);
+    for (size_t i = 0; i < u.size(); i++)
+    {
+        for (size_t j = 0; j < u[i].size(); j++)
+        {
+            fOut << std::scientific << u[i][j] << '\t';
+        }
+        fOut << std::endl;
+    }
+    fOut.close();
+    std::cout << fname << std::endl;
 }
 
 void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
