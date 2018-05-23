@@ -104,7 +104,7 @@ void b4MultipleGrids(std::vector<double> init_point)
 {
     size_t dim = init_point.size();
 
-    std::vector<double> grid = {100, 100};
+    std::vector<double> grid = {1000, 1000};
     std::vector<std::vector<double>> grids(grid.size());
     std::vector<double> dx(grid.size());
 
@@ -162,5 +162,9 @@ void b4MultipleGrids(std::vector<double> init_point)
 int main()
 {
     std::vector<double> start = {0, 0};
+    
+    Timer time_cpp11;
+    time_cpp11.reset();
     b4MultipleGrids(start);
+    std::cout << time_cpp11.elapsed_seconds() << std::endl;
 }
