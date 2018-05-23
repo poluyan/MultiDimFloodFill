@@ -6,13 +6,15 @@
 #include <fstream>
 
 template <typename T>
-T pdf(std::vector<T> x)
-{
-    T rez = 0;
+bool pdf(std::vector<T> x)
+{  
+    T rez1 = 0, rez2 = 0;
     for(auto i : x)
-        rez += std::pow(i, 2.0);
-
-    return std::sqrt(rez) < 2 ? 1 : 0;
+    {
+        rez1 += std::pow(i+1, 2.0);
+        rez2 += std::pow(i-1, 2.0);
+    }
+    return (std::sqrt(rez1) < 1.5 || std::sqrt(rez2) < 1.5) && std::sqrt(rez2) > 0.5 ? true : false;
 }
 
 template <typename T>
@@ -65,9 +67,9 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
             dot[i] = grids[i][t[i]] + dx[i];
         }
 
-        double val = pdf(dot);
+        bool val = pdf(dot);
         fe_count++;
-        if(val > 0.5)
+        if(val)
         {
             std::vector<int> point = t;
             samples.push_back(dot);
@@ -152,7 +154,8 @@ void b4MultipleGrids(std::vector<double> init_point)
     std::cout << "fe count: " << fe_count << std::endl;
     std::cout << "samples: " << samples.size() << std::endl;
     std::cout << samples.size()/double(fe_count) << std::endl;
-
+    
+    print2file2d("maps/samples.dat", samples);
 }
 
 int main()
