@@ -9,10 +9,9 @@ T pdf(std::vector<T> x)
 {
     T rez = 0;
     for(auto i : x)
-    {
         rez += std::pow(i, 2.0);
-    }
-    return rez;
+
+    return std::sqrt(rez) < 2 ? 1 : 0;
 }
 
 void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
@@ -27,7 +26,7 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
     {
         auto t = points.back();
         points.pop_back();
-
+        
         auto it = visited.find(t);
         if(!(it == visited.end()))
         {
@@ -37,7 +36,6 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
         visited.insert(t);
 
         std::vector<double> dot(t.size());
-
         for(size_t i = 0; i != dot.size(); i++)
         {
             dot[i] = grids[i][t[i]] + dx[i];
@@ -45,13 +43,12 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
 
         double val = pdf(dot);
         fe_count++;
-
-        if(val > 1.0)
+        if(val > 0.5)
         {
             std::vector<int> point = t;
-
             samples.push_back(dot);
 
+            // n-dimensional Manhattan distance with r = 1
             for(size_t i = 0; i != t.size(); i++)
             {
                 point = t;
@@ -85,11 +82,10 @@ void b4MultipleGrids(std::vector<double> init_point)
     std::vector<double> dx(grid.size());
 
     double lb = -3, ub = 3;
-
     for(size_t i = 0; i != grids.size(); i++)
     {
         size_t num_points = grid[i];
-        std::vector<double> onegrid(num_points + 1);
+        std::vector<double> onegrid(num_points);
         double startp = lb;
         double endp = ub;
         double es = endp - startp;
@@ -97,16 +93,21 @@ void b4MultipleGrids(std::vector<double> init_point)
         {
             onegrid[j] = startp + j*es/(num_points);
         }
-        grids[i] = grid;
+        grids[i] = onegrid;
         dx[i] = es/(num_points*2);
     }
 
     // finding start dot over created grid
-    std::vector<int> startdot(dim);
+    std::vector<int> startdot(init_point.size());
     for(size_t i = 0; i != startdot.size(); i++)
     {
-        auto pos1 = std::lower_bound(grid.begin(), grid.end(), init_point[i]);
-        startdot[i] = std::distance(grid.begin(), pos1) - 1;
+        std::vector<double> val(grids[i].size());
+        for(size_t j = 0; j != val.size(); j++)
+        {
+            val[j] = grids[i][j] + dx[i];
+        }
+        auto pos1 = std::lower_bound(val.begin(), val.end(), init_point[i]);
+        startdot[i] = std::distance(val.begin(), pos1) - 1;
     }
 
     std::vector<std::vector<int>> points;
@@ -133,5 +134,5 @@ void b4MultipleGrids(std::vector<double> init_point)
 int main()
 {
     std::vector<double> start = {0, 0};
-
+    b4MultipleGrids(start);
 }
