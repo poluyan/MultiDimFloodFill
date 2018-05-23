@@ -101,10 +101,14 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
         }
     }
 }
-
+typedef std::pair<std::string,std::string> Name;
+size_t name_hash( const Name & name )
+{
+    return std::hash<std::string>()(name.first) ^ std::hash<std::string>()(name.second);
+}
 void FloodFill_MultipleGrids_VonNeumann_m(std::vector<std::vector<double>>& grids,
                                         std::vector<std::vector<int>> &points,
-                                        std::unordered_multimap<std::string, bool> &visited,
+                                        std::unordered_map<Name,int,decltype(&name_hash)> &visited,
                                         std::vector<std::vector<double>> &samples,
                                         std::vector<double> dx,
                                         size_t &counter,
@@ -116,13 +120,14 @@ void FloodFill_MultipleGrids_VonNeumann_m(std::vector<std::vector<double>>& grid
         points.pop_back();
         
         std::string s(t.begin(), t.end());
-        auto it = visited.find(s);
+        auto it = visited.find(Name(s, ""));
         if(!(it == visited.end()))
         {
             counter++;
             continue;
         }
-        visited.insert(std::make_pair<std::string,int>(s.c_str(),0));
+        //visited.insert(std::make_pair<std::string,int>(s.c_str(),0));
+        visited[Name(s, "")] = 0;
 
         std::vector<double> dot(t.size());
         for(size_t i = 0; i != dot.size(); i++)
@@ -263,7 +268,7 @@ void b4MultipleGrids_m(std::vector<double> init_point)
 
     points.push_back(startdot);
 
-    std::unordered_multimap<std::string, bool> visited;
+    std::unordered_map<Name,int,decltype(&name_hash)> visited;
 
     std::vector<std::vector<double> > samples;
 
