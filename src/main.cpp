@@ -7,10 +7,10 @@
 #include <string>
 #include "timer.h"
 
-size_t grid_sizes = 11;
-size_t dimension = 8;
+size_t grid_sizes = 20;
+size_t dimension = 3;
 
-const int alpha_size = 12;
+const int alpha_size = 21;
 struct TrieNode
 {
     struct TrieNode *children[alpha_size];
@@ -82,6 +82,29 @@ void print2file2d(std::string fname, std::vector<std::vector<T> > u)
             fOut << std::scientific << u[i][j] << '\t';
         }
         fOut << std::endl;
+    }
+    fOut.close();
+    std::cout << fname << std::endl;
+}
+
+template <typename T>
+void print2file_3d(std::string fname, std::vector<std::vector<T> > u)
+{
+    std::ofstream fOut;
+    fOut.open(fname.c_str());
+    if(!fOut.is_open())
+    {
+        std::cout << "Error opening file." << std::endl;
+        return;
+    }
+    fOut.precision(10);
+    for(size_t i = 0; i < u.size(); i++)
+    {
+        for(size_t j = 0; j < u[i].size(); j++)
+        {
+            fOut << std::scientific << u[i][j] << '\t';
+        }
+        fOut << 1.0 << std::endl;
     }
     fOut.close();
     std::cout << fname << std::endl;
@@ -320,7 +343,8 @@ void b4MultipleGrids_trie(std::vector<double> init_point)
     std::cout << "samples: " << samples.size() << std::endl;
     std::cout << samples.size()/double(fe_count) << std::endl;
 
-    //print2file2d("maps/sample2d.dat", samples);
+    if(dim == 2) print2file2d("maps/sample2d.dat", samples);
+    else if(dim == 3) print2file_3d("maps/sample3d.dat", samples);
 }
 
 
