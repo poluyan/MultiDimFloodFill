@@ -7,10 +7,10 @@
 #include <string>
 #include "timer.h"
 
-size_t grid_sizes = 20;
-size_t dimension = 3;
+size_t grid_sizes = 60;
+size_t dimension = 2;
 
-const int alpha_size = 21;
+const int alpha_size = 61;
 struct TrieNode
 {
     struct TrieNode *children[alpha_size];
@@ -55,13 +55,22 @@ bool search(struct TrieNode *root, std::vector<int> key)
 template <typename T>
 bool pdf(std::vector<T> x)
 {
-    T rez1 = 0, rez2 = 0;
+//    T rez1 = 0, rez2 = 0;
+//    for(auto i : x)
+//    {
+//        rez1 += std::pow(i+0.5, 2.0);
+//        rez2 += std::pow(i-0.5, 2.0);
+//    }
+//    return (std::sqrt(rez1) < 1.5 || std::sqrt(rez2) < 1.5) && std::sqrt(rez2) > 0.5 ? true : false;
+    
+    T sum1 = 0, sum2 = 0;
     for(auto i : x)
     {
-        rez1 += std::pow(i+1, 2.0);
-        rez2 += std::pow(i-1, 2.0);
+        sum1 += i*i;
+        sum2 += (i+1)*(i+1);
     }
-    return (std::sqrt(rez1) < 1.5 || std::sqrt(rez2) < 1.5) && std::sqrt(rez2) > 0.5 ? true : false;
+
+    return std::exp(-5.0*std::abs(sum1 - 1.0)) > 0.1 && std::sqrt(sum2) > 1.75 ? true : false ;
 }
 
 template <typename T>
@@ -352,7 +361,7 @@ void b4MultipleGrids_trie(std::vector<double> init_point)
 int main()
 {
     size_t dim = dimension;
-    std::vector<double> start(dim, -1);
+    std::vector<double> start(dim, std::sqrt(0.5)); //-1
 
     Timer time_cpp11;
 
