@@ -10,18 +10,19 @@
 size_t grid_sizes = 60;
 size_t dimension = 2;
 
-const int alpha_size = 61;
+int alpha_size = grid_sizes + 1;
 struct TrieNode
 {
-    struct TrieNode *children[alpha_size];
+    struct TrieNode **children;
     bool isEndOfWord;
 };
 
-TrieNode *getNode()
+TrieNode *getNode(int asize)
 {
     TrieNode *pNode =  new TrieNode;
     pNode->isEndOfWord = false;
-    for(int i = 0; i < alpha_size; i++)
+    pNode->children = new TrieNode* [asize];
+    for(int i = 0; i < asize; i++)
         pNode->children[i] = 0;
     return pNode;
 }
@@ -33,7 +34,7 @@ void insert(struct TrieNode *root, std::vector<int> key)
     {
         int index = key[i];
         if(!pCrawl->children[index])
-            pCrawl->children[index] = getNode();
+            pCrawl->children[index] = getNode(alpha_size);
         pCrawl = pCrawl->children[index];
     }
     pCrawl->isEndOfWord = true;
@@ -338,7 +339,7 @@ void b4MultipleGrids_trie(std::vector<double> init_point)
 
     points.push_back(startdot);
 
-    TrieNode *visited = getNode();
+    TrieNode *visited = getNode(alpha_size);
 
     std::vector<std::vector<double> > samples;
 
