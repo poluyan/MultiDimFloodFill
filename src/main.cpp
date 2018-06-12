@@ -11,9 +11,10 @@ size_t grid_sizes = 60;
 size_t dimension = 2;
 
 int alpha_size = grid_sizes + 1;
+
 struct TrieNode
 {
-    struct TrieNode **children;
+    TrieNode **children;
     bool isEndOfWord;
 };
 
@@ -27,9 +28,9 @@ TrieNode *getNode(int asize)
     return pNode;
 }
 
-void insert(struct TrieNode *root, std::vector<int> key)
+void insert(TrieNode *root, std::vector<int> key)
 {
-    struct TrieNode *pCrawl = root;
+    TrieNode *pCrawl = root;
     for(int i = 0; i < key.size(); i++)
     {
         int index = key[i];
@@ -40,9 +41,9 @@ void insert(struct TrieNode *root, std::vector<int> key)
     pCrawl->isEndOfWord = true;
 }
 
-bool search(struct TrieNode *root, std::vector<int> key)
+bool search(TrieNode *root, std::vector<int> key)
 {
-    struct TrieNode *pCrawl = root;
+    TrieNode *pCrawl = root;
     for(int i = 0; i < key.size(); i++)
     {
         int index = key[i];
@@ -182,7 +183,7 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
 
 void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& grids,
         std::vector<std::vector<int>> &points,
-        struct TrieNode *visited,
+        TrieNode *visited,
         std::vector<std::vector<double>> &samples,
         std::vector<double> dx,
         size_t &counter,
