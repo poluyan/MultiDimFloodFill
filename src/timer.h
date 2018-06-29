@@ -1,3 +1,6 @@
+#ifndef TIME_H_INCLUDED
+#define TIME_H_INCLUDED
+
 #include <ctime>
 #include <chrono>
 
@@ -25,3 +28,5 @@ private:
 	typedef std::chrono::duration<double, std::ratio<3600> > hours_;
 	std::chrono::time_point<clock_> beg_;
 };
+
+#endif

@@ -6,53 +6,12 @@
 #include <fstream>
 #include <string>
 #include "timer.h"
+#include "trie.h"
 
 size_t grid_sizes = 60;
 size_t dimension = 2;
 
 int alpha_size = grid_sizes + 1;
-
-struct TrieNode
-{
-    TrieNode **children;
-    bool isEndOfWord;
-};
-
-TrieNode *getNode(int asize)
-{
-    TrieNode *pNode =  new TrieNode;
-    pNode->isEndOfWord = false;
-    pNode->children = new TrieNode* [asize];
-    for(int i = 0; i < asize; i++)
-        pNode->children[i] = 0;
-    return pNode;
-}
-
-void insert(TrieNode *root, std::vector<int> key)
-{
-    TrieNode *pCrawl = root;
-    for(int i = 0; i < key.size(); i++)
-    {
-        int index = key[i];
-        if(!pCrawl->children[index])
-            pCrawl->children[index] = getNode(alpha_size);
-        pCrawl = pCrawl->children[index];
-    }
-    pCrawl->isEndOfWord = true;
-}
-
-bool search(TrieNode *root, std::vector<int> key)
-{
-    TrieNode *pCrawl = root;
-    for(int i = 0; i < key.size(); i++)
-    {
-        int index = key[i];
-        if(!pCrawl->children[index])
-            return false;
-        pCrawl = pCrawl->children[index];
-    }
-    return (pCrawl != NULL && pCrawl->isEndOfWord);
-}
 
 template <typename T>
 bool pdf(std::vector<T> x)
@@ -183,7 +142,7 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
 
 void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& grids,
         std::vector<std::vector<int>> &points,
-        TrieNode *visited,
+        trie::TrieNode *visited,
         std::vector<std::vector<double>> &samples,
         std::vector<double> dx,
         size_t &counter,
@@ -194,12 +153,12 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
         auto t = points.back();
         points.pop_back();
 
-        if(search(visited,t))
+        if(trie::search(visited,t))
         {
             counter++;
             continue;
         }
-        insert(visited,t);
+        trie::insert(visited, t, alpha_size);
 
         std::vector<double> dot(t.size());
         for(size_t i = 0; i != dot.size(); i++)
@@ -340,7 +299,7 @@ void b4MultipleGrids_trie(std::vector<double> init_point)
 
     points.push_back(startdot);
 
-    TrieNode *visited = getNode(alpha_size);
+    trie::TrieNode *visited = trie::getNode(alpha_size);
 
     std::vector<std::vector<double> > samples;
 
