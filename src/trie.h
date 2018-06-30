@@ -15,6 +15,17 @@ struct TrieNode
 TrieNode *getNode(int asize);
 void insert(TrieNode *root, std::vector<int> key, int asize);
 bool search(TrieNode *root, std::vector<int> key);
+
+class Trie
+{
+private:
+    TrieNode *root;
+    Trie()
+    {
+        root = new TrieNode();
+    }
+};
+
 }
 
 #endif
