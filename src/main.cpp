@@ -8,7 +8,7 @@
 #include "timer.h"
 #include "trie.h"
 
-size_t grid_sizes = 60;
+size_t grid_sizes = 20;
 size_t dimension = 2;
 
 int alpha_size = grid_sizes + 1;
@@ -24,14 +24,27 @@ bool pdf(std::vector<T> x)
 //    }
 //    return (std::sqrt(rez1) < 1.5 || std::sqrt(rez2) < 1.5) && std::sqrt(rez2) > 0.5 ? true : false;
     
-    T sum1 = 0, sum2 = 0;
-    for(auto i : x)
-    {
-        sum1 += i*i;
-        sum2 += (i+1)*(i+1);
-    }
+//    T sum1 = 0, sum2 = 0;
+//    for(auto i : x)
+//    {
+//        sum1 += i*i;
+//        sum2 += (i+1)*(i+1);
+//    }
+//
+//    return std::exp(-5.0*std::abs(sum1 - 1.0)) > 0.1 && std::sqrt(sum2) > 1.75 ? true : false ;
 
-    return std::exp(-5.0*std::abs(sum1 - 1.0)) > 0.1 && std::sqrt(sum2) > 1.75 ? true : false ;
+    T rez = 0;
+    if(x.size() == 2)
+    {
+        T a = 2.0, b = 0.5;
+        rez = std::signbit(std::pow(x[0]*x[0]+x[1]*x[1]-(a*a+b*b),2.0)-4.0*a*a*(b*b));
+    }
+    if(x.size() == 3)
+    {
+        T a = 2.0, b = 0.5;
+        rez = std::signbit(std::pow(x[0]*x[0]+x[1]*x[1]+x[2]*x[2]-(a*a+b*b),2.0)-4.0*a*a*(b*b-x[2]*x[2]));
+    }
+    return rez;
 }
 
 template <typename T>
@@ -322,7 +335,8 @@ void b4MultipleGrids_trie(std::vector<double> init_point)
 int main()
 {
     size_t dim = dimension;
-    std::vector<double> start(dim, std::sqrt(0.5)); //-1
+    std::vector<double> start(dim, 0); // std::sqrt(0.5)
+    start.front() = -2;
 
     Timer time_cpp11;
 
