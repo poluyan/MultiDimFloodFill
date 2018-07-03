@@ -16,7 +16,7 @@ TrieNode *getNode(int asize)
 void insert(TrieNode *root, std::vector<int> key, int asize)
 {
     TrieNode *p = root;
-    for(int i = 0; i < key.size(); i++)
+    for(size_t i = 0; i < key.size(); i++)
     {
         int index = key[i];
         if(!p->children[index])
@@ -29,7 +29,7 @@ void insert(TrieNode *root, std::vector<int> key, int asize)
 bool search(TrieNode *root, std::vector<int> key)
 {
     TrieNode *p = root;
-    for(int i = 0; i < key.size(); i++)
+    for(size_t i = 0; i < key.size(); i++)
     {
         int index = key[i];
         if(!p->children[index])
