@@ -1,6 +1,6 @@
 #include "trie.h"
 
-namespace trie
+namespace trie_c
 {
    
 TrieNode *getNode(int asize)

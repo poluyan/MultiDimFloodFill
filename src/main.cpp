@@ -155,7 +155,7 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
 
 void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& grids,
         std::vector<std::vector<int>> &points,
-        trie::TrieNode *visited,
+        trie_c::TrieNode *visited,
         std::vector<std::vector<double>> &samples,
         std::vector<double> dx,
         size_t &counter,
@@ -166,12 +166,12 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
         auto t = points.back();
         points.pop_back();
 
-        if(trie::search(visited,t))
+        if(trie_c::search(visited,t))
         {
             counter++;
             continue;
         }
-        trie::insert(visited, t, alpha_size);
+        trie_c::insert(visited, t, alpha_size);
 
         std::vector<double> dot(t.size());
         for(size_t i = 0; i != dot.size(); i++)
@@ -312,7 +312,7 @@ void b4MultipleGrids_trie(std::vector<double> init_point)
 
     points.push_back(startdot);
 
-    trie::TrieNode *visited = trie::getNode(alpha_size);
+    trie_c::TrieNode *visited = trie_c::getNode(alpha_size);
 
     std::vector<std::vector<double> > samples;
 
