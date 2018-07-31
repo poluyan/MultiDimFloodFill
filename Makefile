@@ -1,12 +1,17 @@
 TARGET = main
 CPP = g++
-CPPFLAGS = -c -std=c++11 -Wall
+CPPFLAGS = -c -std=c++11 -Wall -O3 -MD
 
 SRCPATH = ./src
 OBJDIR_RELEASE = obj/Release
-OBJ_RELEASE = $(OBJDIR_RELEASE)/main.o \
+OBJ_RELEASE = \
+	$(OBJDIR_RELEASE)/main.o \
 	$(OBJDIR_RELEASE)/timer.o \
 	$(OBJDIR_RELEASE)/trie.o 
+
+HEADERS = \
+	$(SRCPATH)/trie.h \
+	$(SRCPATH)/timer.h 
 
 all: release
 
@@ -17,7 +22,7 @@ release: before_release out_release
 before_release:
 	test -d $(OBJDIR_RELEASE) || mkdir -p $(OBJDIR_RELEASE)
 
-out_release: $(OBJ_RELEASE)
+out_release: $(OBJ_RELEASE) $(HEADERS)
 	$(CPP) -o $(TARGET) $(OBJDIR_RELEASE)/*.o 
 
 $(OBJDIR_RELEASE)/main.o: $(SRCPATH)/main.cpp
@@ -29,4 +34,7 @@ $(OBJDIR_RELEASE)/trie.o: $(SRCPATH)/trie.cpp
 
 clean_release:
 	rm $(OBJDIR_RELEASE)/*.o
+	rm $(OBJDIR_RELEASE)/*.d
 	rm $(TARGET)
+
+-include $(OBJ_RELEASE:.o=.d)

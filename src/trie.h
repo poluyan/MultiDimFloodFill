@@ -2,6 +2,7 @@
 #define TRIE_H_INCLUDED
 
 #include <vector>
+#include <algorithm>
 
 namespace trie_c
 {
