@@ -9,7 +9,7 @@
 #include "trie.h"
 
 size_t grid_sizes = 20;
-size_t dimension = 2;
+size_t dimension = 3;
 
 int alpha_size = grid_sizes + 1;
 
@@ -175,10 +175,8 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
             auto point = points.get_and_remove_last();
             if(visited.search(point) || samples.search(point))
             {
-                //points.pop_front();
                 continue;
             }
-            //visited.insert(point);
             samples.insert(point);
 
             auto init_point = point;
@@ -210,6 +208,7 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
             }
         }
 
+        size_t number_to_points = 0;
         while(!not_coumputed.empty())
         {
             auto point = not_coumputed.get_and_remove_last();
@@ -223,6 +222,7 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
 
             if(value)
             {
+                ++number_to_points;
                 points.insert(point);
             }
             else
@@ -230,8 +230,9 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
                 visited.insert(point);
             }
         }
+        //std::cout << number_to_points << std::endl;
     }
-    
+    counter = visited.get_total_count() + samples.get_total_count();
     visited.remove_tree();
     points.remove_tree();
     not_coumputed.remove_tree();

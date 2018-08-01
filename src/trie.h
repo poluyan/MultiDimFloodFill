@@ -4,20 +4,6 @@
 #include <vector>
 #include <algorithm>
 
-namespace trie_c
-{
-    struct TrieNode
-    {
-        TrieNode **children;
-        bool isEndOfWord;
-    };
-
-    TrieNode *getNode(int asize);
-    void insert(TrieNode *root, std::vector<int> key, int asize);
-    bool search(TrieNode *root, std::vector<int> key);
-
-}
-
 namespace trie_cpp
 {
     template <template <typename> class T, typename I>
