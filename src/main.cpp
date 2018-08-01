@@ -23,7 +23,7 @@ bool pdf(std::vector<T> x)
 //        rez2 += std::pow(i-0.5, 2.0);
 //    }
 //    return (std::sqrt(rez1) < 1.5 || std::sqrt(rez2) < 1.5) && std::sqrt(rez2) > 0.5 ? true : false;
-    
+
 //    T sum1 = 0, sum2 = 0;
 //    for(auto i : x)
 //    {
@@ -154,61 +154,87 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
 }
 
 void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& grids,
-        std::vector<std::vector<int>> &points,
-        trie_c::TrieNode *visited,
-        std::vector<std::vector<double>> &samples,
+        std::vector<int> &start,
+        trie_cpp::Trie<trie_cpp::Node<int>,int> &samples,
         std::vector<double> dx,
         size_t &counter,
         size_t &fe_count)
 {
-    while(!points.empty())
+    std::vector<double> dot(grids.size());
+
+    trie_cpp::Trie<trie_cpp::Node<int>,int> visited;
+    trie_cpp::Trie<trie_cpp::Node<int>,int> points;
+    trie_cpp::Trie<trie_cpp::Node<int>,int> not_coumputed;
+    points.insert(start);
+    ++fe_count;
+
+    while(!points.empty() || !not_coumputed.empty())
     {
-        auto t = points.back();
-        points.pop_back();
-
-        if(trie_c::search(visited,t))
+        while(!points.empty())
         {
-            counter++;
-            continue;
-        }
-        trie_c::insert(visited, t, alpha_size);
-
-        std::vector<double> dot(t.size());
-        for(size_t i = 0; i != dot.size(); i++)
-        {
-            dot[i] = grids[i][t[i]] + dx[i];
-        }
-
-        bool val = pdf(dot);
-        fe_count++;
-        if(val)
-        {
-            std::vector<int> point = t;
-            samples.push_back(dot);
-
-            // n-dimensional Manhattan distance with r = 1
-            for(size_t i = 0; i != t.size(); i++)
+            auto point = points.get_and_remove_last();
+            if(visited.search(point) || samples.search(point))
             {
-                point = t;
+                //points.pop_front();
+                continue;
+            }
+            //visited.insert(point);
+            samples.insert(point);
+
+            auto init_point = point;
+            for(size_t i = 0; i != point.size(); i++)
+            {
+                point = init_point;
                 point[i] = point[i] + 1;
 
                 if(point[i] < 0 || point[i] > grids[i].size() - 1)
                     continue;
 
-                points.push_back(point);
+                if(!visited.search(point) && !samples.search(point))
+                {
+                    not_coumputed.insert(point);
+                }
             }
-            for(size_t i = 0; i != t.size(); i++)
+            for(size_t i = 0; i != point.size(); i++)
             {
-                point = t;
+                point = init_point;
                 point[i] = point[i] - 1;
 
                 if(point[i] < 0 || point[i] > grids[i].size() - 1)
                     continue;
 
-                points.push_back(point);
+                if(!visited.search(point) && !samples.search(point))
+                {
+                    not_coumputed.insert(point);
+                }
+            }
+        }
+
+        while(!not_coumputed.empty())
+        {
+            auto point = not_coumputed.get_and_remove_last();
+            std::vector<double> values(point.size());
+            for(size_t j = 0; j != values.size(); j++)
+            {
+                values[j] = grids[j][point[j]] + dx[j];
+            }
+            bool value = pdf(values);
+            ++fe_count;
+
+            if(value)
+            {
+                points.insert(point);
+            }
+            else
+            {
+                visited.insert(point);
             }
         }
     }
+    
+    visited.remove_tree();
+    points.remove_tree();
+    not_coumputed.remove_tree();
 }
 
 void b4MultipleGrids(std::vector<double> init_point)
@@ -312,14 +338,27 @@ void b4MultipleGrids_trie(std::vector<double> init_point)
 
     points.push_back(startdot);
 
-    trie_c::TrieNode *visited = trie_c::getNode(alpha_size);
+    //trie_c::TrieNode *visited = trie_c::getNode(alpha_size);
 
     std::vector<std::vector<double> > samples;
-
+    trie_cpp::Trie<trie_cpp::Node<int>,int> trie_samples;
+    
     size_t counter = 0;
     size_t fe_count = 0;
 
-    FloodFill_MultipleGrids_VonNeumann_trie(grids, points, visited, samples, dx, counter, fe_count);
+    FloodFill_MultipleGrids_VonNeumann_trie(grids, startdot, trie_samples, dx, counter, fe_count);
+    
+    while(!trie_samples.empty())
+    {
+        auto point = trie_samples.get_and_remove_last();
+        std::vector<double> values(point.size());
+        for(size_t j = 0; j != values.size(); j++)
+        {
+            values[j] = grids[j][point[j]] + dx[j];
+        }
+        samples.push_back(values);
+    }
+    
 
     std::cout << counter << std::endl;
     std::cout << "fe count: " << fe_count << std::endl;
@@ -338,7 +377,7 @@ int main()
     std::vector<double> start(dim, 0); // std::sqrt(0.5)
     start.front() = -2;
 
-    Timer time_cpp11;
+    timer::Timer time_cpp11;
 
     time_cpp11.reset();
     b4MultipleGrids(start);
