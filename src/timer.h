@@ -9,10 +9,7 @@ namespace timer
     class Timer
     {
     public:
-        Timer() :
-            beg_(clock_::now())
-        {
-        }
+        Timer(): beg_(clock_::now()) {}
         void reset();
         double elapsed_nanoseconds() const;
         double elapsed_microseconds() const;

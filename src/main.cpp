@@ -3,10 +3,9 @@
 #include <vector>
 #include <cmath>
 #include <set>
-#include <fstream>
-#include <string>
 #include "timer.h"
 #include "trie.h"
+#include "print2file.h"
 
 size_t grid_sizes = 20;
 size_t dimension = 3;
@@ -47,52 +46,6 @@ bool pdf(std::vector<T> x)
     return rez;
 }
 
-template <typename T>
-void print2file2d(std::string fname, std::vector<std::vector<T> > u)
-{
-    std::ofstream fOut;
-    fOut.open(fname.c_str());
-    if(!fOut.is_open())
-    {
-        std::cout << "Error opening file." << std::endl;
-        return;
-    }
-    fOut.precision(10);
-    for(size_t i = 0; i < u.size(); i++)
-    {
-        for(size_t j = 0; j < u[i].size(); j++)
-        {
-            fOut << std::scientific << u[i][j] << '\t';
-        }
-        fOut << std::endl;
-    }
-    fOut.close();
-    std::cout << fname << std::endl;
-}
-
-template <typename T>
-void print2file_3d(std::string fname, std::vector<std::vector<T> > u)
-{
-    std::ofstream fOut;
-    fOut.open(fname.c_str());
-    if(!fOut.is_open())
-    {
-        std::cout << "Error opening file." << std::endl;
-        return;
-    }
-    fOut.precision(10);
-    for(size_t i = 0; i < u.size(); i++)
-    {
-        for(size_t j = 0; j < u[i].size(); j++)
-        {
-            fOut << std::scientific << u[i][j] << '\t';
-        }
-        fOut << 1.0 << std::endl;
-    }
-    fOut.close();
-    std::cout << fname << std::endl;
-}
-
 void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
                                         std::vector<std::vector<int>> &points,
                                         std::set<std::vector<int>> &visited,
@@ -106,7 +59,6 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
         auto t = points.back();
         points.pop_back();
 
-        std::string s(t.begin(), t.end());
         auto it = visited.find(t);
         if(!(it == visited.end()))
         {
@@ -134,7 +86,7 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
                 point = t;
                 point[i] = point[i] + 1;
 
-                if(point[i] < 0 || point[i] > grids[i].size() - 1)
+                if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
                     continue;
 
                 points.push_back(point);
@@ -144,7 +96,7 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
                 point = t;
                 point[i] = point[i] - 1;
 
-                if(point[i] < 0 || point[i] > grids[i].size() - 1)
+                if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
                     continue;
 
                 points.push_back(point);
@@ -185,7 +137,7 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
                 point = init_point;
                 point[i] = point[i] + 1;
 
-                if(point[i] < 0 || point[i] > grids[i].size() - 1)
+                if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
                     continue;
 
                 if(!visited.search(point) && !samples.search(point))
@@ -198,7 +150,7 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
                 point = init_point;
                 point[i] = point[i] - 1;
 
-                if(point[i] < 0 || point[i] > grids[i].size() - 1)
+                if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
                     continue;
 
                 if(!visited.search(point) && !samples.search(point))
