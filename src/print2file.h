@@ -1,5 +1,5 @@
-#ifndef PRINT2FILE_H_INCLUDED
-#define PRINT2FILE_H_INCLUDED
+#ifndef PRINT2FILE_H
+#define PRINT2FILE_H
 
 #include <string>
 #include <vector>

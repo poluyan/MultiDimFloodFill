@@ -1,5 +1,5 @@
-#ifndef TRIE_H_INCLUDED
-#define TRIE_H_INCLUDED
+#ifndef TRIE_H
+#define TRIE_H
 
 #include <vector>
 #include <algorithm>

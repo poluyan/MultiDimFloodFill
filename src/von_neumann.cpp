@@ -1,10 +1,6 @@
 #include "von_neumann.h"
 #include "print2file.h"
-
-size_t grid_sizes = 20;
-size_t dimension = 3;
-
-int alpha_size = grid_sizes + 1;
+#include "pdf.h"
 
 void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
                                         std::vector<std::vector<int>> &points,
@@ -150,7 +146,7 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
     not_coumputed.remove_tree();
 }
 
-void b4MultipleGrids(std::vector<double> init_point)
+void b4MultipleGrids(std::vector<double> init_point, size_t grid_sizes)
 {
     size_t dim = init_point.size();
 
@@ -209,7 +205,7 @@ void b4MultipleGrids(std::vector<double> init_point)
     //print2file2d("maps/sample2d.dat", samples);
 }
 
-void b4MultipleGrids_trie(std::vector<double> init_point)
+void b4MultipleGrids_trie(std::vector<double> init_point, size_t grid_sizes)
 {
     size_t dim = init_point.size();
 
