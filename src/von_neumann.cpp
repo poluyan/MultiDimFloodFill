@@ -8,7 +8,8 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
                                         std::vector<std::vector<double>> &samples,
                                         std::vector<double> dx,
                                         size_t &counter,
-                                        size_t &fe_count)
+                                        size_t &fe_count,
+                                        bool outside_bounds)
 {
     while(!points.empty())
     {
@@ -41,10 +42,24 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
             {
                 point = t;
                 point[i] = point[i] + 1;
-
-                if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
-                    continue;
-
+                
+                if(outside_bounds)
+                {
+                    if(point[i] < 0)
+                    {
+                        point[i] = grids[i].size() - 1;
+                    }
+                    if(point[i] > static_cast<int>(grids[i].size() - 1))
+                    {
+                        point[i] = 0;
+                    }
+                }
+                else
+                {
+                    if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
+                        continue;
+                }
+                
                 points.push_back(point);
             }
             for(size_t i = 0; i != t.size(); i++)
@@ -52,8 +67,22 @@ void FloodFill_MultipleGrids_VonNeumann(std::vector<std::vector<double>>& grids,
                 point = t;
                 point[i] = point[i] - 1;
 
-                if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
-                    continue;
+                if(outside_bounds)
+                {
+                    if(point[i] < 0)
+                    {
+                        point[i] = grids[i].size() - 1;
+                    }
+                    if(point[i] > static_cast<int>(grids[i].size() - 1))
+                    {
+                        point[i] = 0;
+                    }
+                }
+                else
+                {
+                    if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
+                        continue;
+                }
 
                 points.push_back(point);
             }
@@ -66,7 +95,8 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
         trie_cpp::Trie<trie_cpp::Node<int>,int> &samples,
         std::vector<double> dx,
         size_t &counter,
-        size_t &fe_count)
+        size_t &fe_count,
+        bool outside_bounds)
 {
     std::vector<double> dot(grids.size());
 
@@ -93,8 +123,22 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
                 point = init_point;
                 point[i] = point[i] + 1;
 
-                if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
-                    continue;
+                if(outside_bounds)
+                {
+                    if(point[i] < 0)
+                    {
+                        point[i] = grids[i].size() - 1;
+                    }
+                    if(point[i] > static_cast<int>(grids[i].size() - 1))
+                    {
+                        point[i] = 0;
+                    }
+                }
+                else
+                {
+                    if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
+                        continue;
+                }
 
                 if(!visited.search(point) && !samples.search(point))
                 {
@@ -106,8 +150,22 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
                 point = init_point;
                 point[i] = point[i] - 1;
 
-                if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
-                    continue;
+                if(outside_bounds)
+                {
+                    if(point[i] < 0)
+                    {
+                        point[i] = grids[i].size() - 1;
+                    }
+                    if(point[i] > static_cast<int>(grids[i].size() - 1))
+                    {
+                        point[i] = 0;
+                    }
+                }
+                else
+                {
+                    if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
+                        continue;
+                }
 
                 if(!visited.search(point) && !samples.search(point))
                 {
@@ -146,7 +204,7 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
     not_coumputed.remove_tree();
 }
 
-void b4MultipleGrids(std::vector<double> init_point, size_t grid_sizes)
+void b4MultipleGrids(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds)
 {
     size_t dim = init_point.size();
 
@@ -195,7 +253,7 @@ void b4MultipleGrids(std::vector<double> init_point, size_t grid_sizes)
     size_t counter = 0;
     size_t fe_count = 0;
 
-    FloodFill_MultipleGrids_VonNeumann(grids, points, visited, samples, dx, counter, fe_count);
+    FloodFill_MultipleGrids_VonNeumann(grids, points, visited, samples, dx, counter, fe_count, outside_bounds);
 
     std::cout << counter << std::endl;
     std::cout << "fe count: " << fe_count << std::endl;
@@ -205,7 +263,7 @@ void b4MultipleGrids(std::vector<double> init_point, size_t grid_sizes)
     //print2file2d("maps/sample2d.dat", samples);
 }
 
-void b4MultipleGrids_trie(std::vector<double> init_point, size_t grid_sizes)
+void b4MultipleGrids_trie(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds)
 {
     size_t dim = init_point.size();
 
@@ -255,7 +313,7 @@ void b4MultipleGrids_trie(std::vector<double> init_point, size_t grid_sizes)
     size_t counter = 0;
     size_t fe_count = 0;
 
-    FloodFill_MultipleGrids_VonNeumann_trie(grids, startdot, trie_samples, dx, counter, fe_count);
+    FloodFill_MultipleGrids_VonNeumann_trie(grids, startdot, trie_samples, dx, counter, fe_count, outside_bounds);
 
     while(!trie_samples.empty())
     {

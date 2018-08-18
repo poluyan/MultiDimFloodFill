@@ -9,7 +9,6 @@
 int main()
 {
     size_t dim = 3;
-    
     size_t grid_sizes = 20;
     
     std::vector<double> start(dim, 0); // std::sqrt(0.5)
@@ -18,9 +17,9 @@ int main()
     timer::Timer time_cpp11;
 
     time_cpp11.reset();
-    b4MultipleGrids(start, grid_sizes);
+    b4MultipleGrids(start, grid_sizes, true);
     std::cout << time_cpp11.elapsed_seconds() << std::endl;
     time_cpp11.reset();
-    b4MultipleGrids_trie(start, grid_sizes);
+    b4MultipleGrids_trie(start, grid_sizes, true);
     std::cout << time_cpp11.elapsed_seconds() << std::endl;
 }
