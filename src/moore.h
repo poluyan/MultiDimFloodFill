@@ -1,7 +1,6 @@
 #ifndef MOORE_H
 #define MOORE_H
 
-
 template <typename T>
 bool increase(const std::vector<std::vector<T>>& v, std::vector<size_t>& it)
 {
@@ -39,7 +38,7 @@ std::vector<std::vector<T>> iterate(const std::vector<std::vector<T>>& v)
     std::vector<std::vector<T>> values;
     do
     {
-        values.push_back(do_job(v, it));
+        values.push_back(get_line(v, it));
     }
     while(increase(v, it));
     return values;
