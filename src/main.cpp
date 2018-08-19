@@ -18,8 +18,8 @@ int main()
 
     time_cpp11.reset();
     b4MultipleGrids(start, grid_sizes, true);
-    std::cout << time_cpp11.elapsed_seconds() << std::endl;
+    std::cout << "total time:        " << time_cpp11.elapsed_seconds() << std::endl;
     time_cpp11.reset();
     b4MultipleGrids_trie(start, grid_sizes, true);
-    std::cout << time_cpp11.elapsed_seconds() << std::endl;
+    std::cout << "total time (trie): " << time_cpp11.elapsed_seconds() << std::endl;
 }
