@@ -1,2 +1,2 @@
 # multidimfloodfill
-Multidimensional Flood Fill Algorithm with Von Neumann neighborhood
+Multidimensional Flood Fill Algorithm with Von Neumann and Moore neighborhood
