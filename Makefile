@@ -7,13 +7,15 @@ OBJDIR_RELEASE = obj/Release
 OBJ_RELEASE = \
 	$(OBJDIR_RELEASE)/main.o \
 	$(OBJDIR_RELEASE)/timer.o \
-	$(OBJDIR_RELEASE)/von_neumann.o 
+	$(OBJDIR_RELEASE)/von_neumann.o \
+	$(OBJDIR_RELEASE)/moore.o \
 
 HEADERS = \
 	$(SRCPATH)/trie.h \
 	$(SRCPATH)/timer.h \
 	$(SRCPATH)/print2file.h \
-	$(SRCPATH)/von_neumann.h
+	$(SRCPATH)/von_neumann.h \
+	$(SRCPATH)/moore.h
 
 all: release
 
@@ -33,6 +35,8 @@ $(OBJDIR_RELEASE)/timer.o: $(SRCPATH)/timer.cpp
 	$(CPP) $(CPPFLAGS) $(SRCPATH)/timer.cpp -o $(OBJDIR_RELEASE)/timer.o
 $(OBJDIR_RELEASE)/von_neumann.o: $(SRCPATH)/von_neumann.cpp
 	$(CPP) $(CPPFLAGS) $(SRCPATH)/von_neumann.cpp -o $(OBJDIR_RELEASE)/von_neumann.o
+$(OBJDIR_RELEASE)/moore.o: $(SRCPATH)/moore.cpp
+	$(CPP) $(CPPFLAGS) $(SRCPATH)/moore.cpp -o $(OBJDIR_RELEASE)/moore.o
 
 clean_release:
 	rm $(OBJDIR_RELEASE)/*.o

@@ -204,7 +204,7 @@ void FloodFill_MultipleGrids_VonNeumann_trie(std::vector<std::vector<double>>& g
     not_coumputed.remove_tree();
 }
 
-void b4MultipleGrids(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds)
+void b4MultipleGrids_VonNeumann(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds)
 {
     size_t dim = init_point.size();
 
@@ -263,7 +263,7 @@ void b4MultipleGrids(std::vector<double> init_point, size_t grid_sizes, bool out
     //print2file2d("maps/sample2d.dat", samples);
 }
 
-void b4MultipleGrids_trie(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds)
+void b4MultipleGrids_VonNeumann_trie(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds)
 {
     size_t dim = init_point.size();
 

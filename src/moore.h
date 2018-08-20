@@ -1,6 +1,11 @@
 #ifndef MOORE_H
 #define MOORE_H
 
+#include <vector>
+#include <set>
+#include <cmath>
+#include <iostream>
+
 template <typename T>
 bool increase(const std::vector<std::vector<T>>& v, std::vector<size_t>& it)
 {
@@ -43,5 +48,17 @@ std::vector<std::vector<T>> iterate(const std::vector<std::vector<T>>& v)
     while(increase(v, it));
     return values;
 }
+
+void FloodFill_MultipleGrids_Moore(
+    std::vector<std::vector<double>>& grids,
+    std::vector<std::vector<int>> &points,
+    std::set<std::vector<int>> &visited,
+    std::vector<std::vector<double>> &samples,
+    std::vector<double> dx,
+    size_t &counter,
+    size_t &fe_count,
+    bool outside_bounds);
+    
+void b4MultipleGrids_Moore(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds);
 
 #endif

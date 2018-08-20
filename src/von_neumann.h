@@ -26,7 +26,7 @@ void FloodFill_MultipleGrids_VonNeumann_trie(
     size_t &fe_count,
     bool outside_bounds);
 
-void b4MultipleGrids(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds);
-void b4MultipleGrids_trie(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds);
+void b4MultipleGrids_VonNeumann(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds);
+void b4MultipleGrids_VonNeumann_trie(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds);
 
 #endif
