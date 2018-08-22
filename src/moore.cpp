@@ -2,14 +2,27 @@
 #include "pdf.h"
 
 void FloodFill_MultipleGrids_Moore(std::vector<std::vector<double>>& grids,
-                                        std::vector<std::vector<int>> &points,
-                                        std::set<std::vector<int>> &visited,
-                                        std::vector<std::vector<double>> &samples,
-                                        std::vector<double> dx,
-                                        size_t &counter,
-                                        size_t &fe_count,
-                                        bool outside_bounds)
+                                   std::vector<std::vector<int>> &points,
+                                   std::set<std::vector<int>> &visited,
+                                   std::vector<std::vector<double>> &samples,
+                                   std::vector<double> dx,
+                                   size_t &counter,
+                                   size_t &fe_count,
+                                   bool outside_bounds)
 {
+
+    /// generate all permutations
+    std::vector<std::vector<int>> variable_values(grids.size(), std::vector<int>(3));
+    for(size_t i = 0; i != variable_values.size(); i++)
+    {
+        variable_values[i][0] = -1;
+        variable_values[i][1] = 0;
+        variable_values[i][2] = 1;
+    }
+    std::vector<std::vector<int>> permut = iterate(variable_values);
+    
+    std::cout << "hetre" << std::endl;
+
     while(!points.empty())
     {
         auto t = points.back();
@@ -36,57 +49,39 @@ void FloodFill_MultipleGrids_Moore(std::vector<std::vector<double>>& grids,
             std::vector<int> point = t;
             samples.push_back(dot);
 
-            // n-dimensional Manhattan distance with r = 1
-            for(size_t i = 0; i != t.size(); i++)
+            // n-dimensional Moore distance with r = 1
+            for(size_t i = 0; i != permut.size(); i++)
             {
                 point = t;
-                point[i] = point[i] + 1;
-                
-                if(outside_bounds)
+                for(size_t j = 0; j != point.size(); j++)
                 {
-                    if(point[i] < 0)
+                    point[j] = point[j] + permut[i][j];
+                    if(point[j] < 0)
                     {
-                        point[i] = grids[i].size() - 1;
+                        point[j] = grids[j].size() - 1;
                     }
-                    if(point[i] > static_cast<int>(grids[i].size() - 1))
+                    if(point[j] > static_cast<int>(grids[j].size() - 1))
                     {
-                        point[i] = 0;
-                    }
-                }
-                else
-                {
-                    if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
-                        continue;
-                }
-                
-                points.push_back(point);
-            }
-            for(size_t i = 0; i != t.size(); i++)
-            {
-                point = t;
-                point[i] = point[i] - 1;
-
-                if(outside_bounds)
-                {
-                    if(point[i] < 0)
-                    {
-                        point[i] = grids[i].size() - 1;
-                    }
-                    if(point[i] > static_cast<int>(grids[i].size() - 1))
-                    {
-                        point[i] = 0;
+                        point[j] = 0;
                     }
                 }
-                else
-                {
-                    if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
-                        continue;
-                }
-
                 points.push_back(point);
             }
         }
     }
+
+//                bool flag = true;
+//                for(size_t j = 0; j != point.size(); j++)
+//                {
+//                    point[j] = point[j] + permut[i][j];
+//                    if(point[j] < 0 || point[j] > grids[j].size() - 1)
+//                    {
+//                        flag = false;
+//                        break;
+//                    }
+//                }
+//                if(!flag)
+//                    continue;
 }
 
 void b4MultipleGrids_Moore(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds)
