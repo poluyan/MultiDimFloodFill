@@ -20,7 +20,7 @@ void FloodFill_MultipleGrids_Moore(std::vector<std::vector<double>>& grids,
         variable_values[i][2] = 1;
     }
     std::vector<std::vector<int>> permut = iterate(variable_values);
-    
+
     std::cout << "hetre" << std::endl;
 
     while(!points.empty())
@@ -53,35 +53,41 @@ void FloodFill_MultipleGrids_Moore(std::vector<std::vector<double>>& grids,
             for(size_t i = 0; i != permut.size(); i++)
             {
                 point = t;
-                for(size_t j = 0; j != point.size(); j++)
+
+                if(outside_bounds)
                 {
-                    point[j] = point[j] + permut[i][j];
-                    if(point[j] < 0)
+                    for(size_t j = 0; j != point.size(); j++)
                     {
-                        point[j] = grids[j].size() - 1;
+                        point[j] = point[j] + permut[i][j];
+                        if(point[j] < 0)
+                        {
+                            point[j] = grids[j].size() - 1;
+                        }
+                        if(point[j] > static_cast<int>(grids[j].size() - 1))
+                        {
+                            point[j] = 0;
+                        }
                     }
-                    if(point[j] > static_cast<int>(grids[j].size() - 1))
+                }
+                else
+                {
+                    bool flag = true;
+                    for(size_t j = 0; j != point.size(); j++)
                     {
-                        point[j] = 0;
+                        point[j] = point[j] + permut[i][j];
+                        if(point[j] < 0 || point[j] > static_cast<int>(grids[j].size() - 1))
+                        {
+                            flag = false;
+                            break;
+                        }
                     }
+                    if(!flag)
+                        continue;
                 }
                 points.push_back(point);
             }
         }
     }
-
-//                bool flag = true;
-//                for(size_t j = 0; j != point.size(); j++)
-//                {
-//                    point[j] = point[j] + permut[i][j];
-//                    if(point[j] < 0 || point[j] > grids[j].size() - 1)
-//                    {
-//                        flag = false;
-//                        break;
-//                    }
-//                }
-//                if(!flag)
-//                    continue;
 }
 
 void b4MultipleGrids_Moore(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds)
