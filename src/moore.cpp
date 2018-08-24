@@ -1,11 +1,11 @@
 #include "moore.h"
 #include "pdf.h"
 
-void FloodFill_MultipleGrids_Moore(std::vector<std::vector<double>>& grids,
+void FloodFill_MultipleGrids_Moore(const std::vector<std::vector<double>> &grids,
                                    std::vector<std::vector<int>> &points,
                                    std::set<std::vector<int>> &visited,
                                    std::vector<std::vector<double>> &samples,
-                                   std::vector<double> dx,
+                                   const std::vector<double> &dx,
                                    size_t &counter,
                                    size_t &fe_count,
                                    bool outside_bounds)
@@ -90,7 +90,7 @@ void FloodFill_MultipleGrids_Moore(std::vector<std::vector<double>>& grids,
     }
 }
 
-void b4MultipleGrids_Moore(std::vector<double> init_point, size_t grid_sizes, bool outside_bounds)
+void b4MultipleGrids_Moore(const std::vector<double> &init_point, size_t grid_sizes, bool outside_bounds)
 {
     size_t dim = init_point.size();
 

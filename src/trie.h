@@ -115,7 +115,7 @@ namespace trie_cpp
                 p = p->children[std::distance(p->children.begin(), it)];
             }
         }
-        return (p != 0 && p->isEndOfWord);
+        return p->isEndOfWord;
     }
 
     template <typename T, typename I>

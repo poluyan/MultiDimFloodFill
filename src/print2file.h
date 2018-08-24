@@ -6,7 +6,7 @@
 #include <fstream>
 
 template <typename T>
-void print2file2d(std::string fname, std::vector<std::vector<T> > u)
+void print2file2d(const std::string fname, const std::vector<std::vector<T> > &u)
 {
     std::ofstream fOut;
     fOut.open(fname.c_str());
@@ -29,7 +29,7 @@ void print2file2d(std::string fname, std::vector<std::vector<T> > u)
 }
 
 template <typename T>
-void print2file_3d(std::string fname, std::vector<std::vector<T> > u)
+void print2file_3d(const std::string fname, const std::vector<std::vector<T> > &u)
 {
     std::ofstream fOut;
     fOut.open(fname.c_str());
