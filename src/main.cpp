@@ -7,6 +7,7 @@
 #include "von_neumann.h"
 #include "moore.h"
 
+
 int main()
 {    
     size_t dim = 3;
