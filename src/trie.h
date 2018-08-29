@@ -85,7 +85,7 @@ namespace trie_cpp
             if(it == p->children.end())
             {
                 T *temp = new T(i);
-                p->children.push_back(temp);
+                p->children.emplace_back(std::move(temp));
                 p = p->children.back();
             }
             else
