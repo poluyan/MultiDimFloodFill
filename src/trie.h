@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <memory>
 
 namespace trie_cpp
 {
@@ -10,7 +11,7 @@ namespace trie_cpp
     struct TrieNode
     {
         I index;
-        std::vector<T<I>*> children;
+        std::vector<std::unique_ptr<T<I>>> children;
         bool isEndOfWord;
         TrieNode() : index(0), isEndOfWord(0) { }
         TrieNode(I ind) : index(ind), isEndOfWord(0) { }
@@ -34,18 +35,22 @@ namespace trie_cpp
     template <typename T, typename I>
     class Trie
     {
+        bool all_sorted;
     public:
-        T *root;
-        Trie() noexcept;
+        std::unique_ptr<T> root;
+        Trie();
         ~Trie();
         bool empty() const;
-        void insert(std::vector<I> key);
-        bool search(std::vector<I> key) const;
+        void insert(const std::vector<I> &key);
+        //void binary_insert(const std::vector<I> &key);
+        bool search(const std::vector<I> &key) const;
+        bool binary_search(const std::vector<I> &key) const;
         size_t get_total_count() const;
         void fill_tree_count();
         void remove_tree();
         std::vector<I> get_and_remove_last();
         size_t get_number_of_nodes() const;
+        void sort();
     private:
         void number_of_nodes(T *p, size_t &count) const;
         void get_number(T *p, size_t &count) const;
@@ -53,17 +58,14 @@ namespace trie_cpp
         void remove_tree(T *p);
         bool is_all_end_of_word_true(T *p) const;
         void delete_last();
+        void sort(T *p);
     };
 
     template <typename T, typename I>
-    Trie<T,I>::Trie() noexcept
-    {
-        root = new T();
-    }
+    Trie<T,I>::Trie() : all_sorted(false), root(new T()) { }
     template <typename T, typename I>
     Trie<T,I>::~Trie()
     {
-        delete root;
     }
 
     template <typename T, typename I>
@@ -73,36 +75,36 @@ namespace trie_cpp
     }
 
     template <typename T, typename I>
-    void Trie<T,I>::insert(std::vector<I> key)
+    void Trie<T,I>::insert(const std::vector<I> &key)
     {
-        T *p = root;
+        all_sorted = false;
+        auto p = root.get();
         for(auto &i : key)
         {
-            auto it = std::find_if(p->children.begin(), p->children.end(), [&i](const T* obj)
+            auto it = std::find_if(p->children.begin(), p->children.end(), [&i](const std::unique_ptr<T> &obj)
             {
                 return obj->index == i;
             });
             if(it == p->children.end())
             {
-                T *temp = new T(i);
-                p->children.emplace_back(std::move(temp));
-                p = p->children.back();
+                p->children.emplace_back(new T(i));
+                p = p->children.back().get();
             }
             else
             {
-                p = p->children[std::distance(p->children.begin(), it)];
+                p = p->children[std::distance(p->children.begin(), it)].get();
             }
         }
         p->isEndOfWord = true;
     }
 
     template <typename T, typename I>
-    bool Trie<T,I>::search(std::vector<I> key) const
+    bool Trie<T,I>::search(const std::vector<I> &key) const
     {
-        T *p = root;
+        auto p = root.get();
         for(auto &i : key)
         {
-            auto it = std::find_if(p->children.begin(), p->children.end(), [&i](const T* obj)
+            auto it = std::find_if(p->children.begin(), p->children.end(), [&i](const std::unique_ptr<T> &obj)
             {
                 return obj->index == i;
             });
@@ -112,7 +114,32 @@ namespace trie_cpp
             }
             else
             {
-                p = p->children[std::distance(p->children.begin(), it)];
+                p = p->children[std::distance(p->children.begin(), it)].get();
+            }
+        }
+        return p->isEndOfWord;
+        //return (p != 0 && p->isEndOfWord);
+    }
+
+    template <typename T, typename I>
+    bool Trie<T,I>::binary_search(const std::vector<I> &key) const
+    {
+        auto p = root.get();
+        std::unique_ptr<T> val(new T());
+        for(auto &i : key)
+        {
+            val->index = i;
+            auto it = std::lower_bound(p->children.begin(), p->children.end(), val, [](const std::unique_ptr<T> &l, const std::unique_ptr<T> &r)
+            {
+                return l->index < r->index;
+            });
+            if(it == p->children.end())
+            {
+                return false;
+            }
+            else
+            {
+                p = p->children[std::distance(p->children.begin(), it)].get();
             }
         }
         return p->isEndOfWord;
@@ -122,7 +149,7 @@ namespace trie_cpp
     size_t Trie<T,I>::get_total_count() const
     {
         size_t count = 0;
-        get_number(root, count);
+        get_number(root.get(), count);
         return count;
     }
 
@@ -130,34 +157,51 @@ namespace trie_cpp
     void Trie<T,I>::fill_tree_count()
     {
         fill_tree_count(root);
-        //root->count = get_total_count();
     }
 
     template <typename T, typename I>
     void Trie<T,I>::remove_tree()
     {
-        T *p = root;
+        auto p = root.get();
         while(!is_all_end_of_word_true(p))
         {
             remove_tree(p);
         }
-        for(auto &i : root->children)
-            delete i;
         p->children.clear();
+    }
+
+    template <typename T, typename I>
+    void Trie<T,I>::sort()
+    {
+        sort(root.get());
+        all_sorted = true;
+    }
+
+    template <typename T, typename I>
+    void Trie<T,I>::sort(T *p)
+    {
+        std::sort(p->children.begin(),p->children.end(),[](const std::unique_ptr<T> &l, const std::unique_ptr<T> &r)
+        {
+            return l->index < r->index;
+        });
+        for(auto &i : p->children)
+        {
+            sort(i.get());
+        }
     }
 
     template <typename T, typename I>
     std::vector<I> Trie<T,I>::get_and_remove_last()
     {
         std::vector<I> sample;
-        T *p = root;
+        auto p = root.get();
         if(p->children.empty())
             return sample;
 
         while(!p->children.back()->isEndOfWord)
         {
             sample.push_back(p->children.back()->index);
-            p = p->children.back();
+            p = p->children.back().get();
         }
         sample.push_back(p->children.back()->index);
 
@@ -170,7 +214,7 @@ namespace trie_cpp
     size_t Trie<T,I>::get_number_of_nodes() const
     {
         size_t count = 0;
-        number_of_nodes(root, count);
+        number_of_nodes(root.get(), count);
         return count;
     }
 
@@ -180,17 +224,17 @@ namespace trie_cpp
         count += p->children.size();
         for(auto &i : p->children)
         {
-            number_of_nodes(i, count);
+            number_of_nodes(i.get(), count);
         }
     }
     template <typename T, typename I>
-    void Trie<T,I>::get_number(T *p, size_t &count) const
+    void Trie<T,I>::get_number(T* p, size_t &count) const
     {
         for(auto &i : p->children)
         {
             if(i->isEndOfWord)
                 ++count;
-            get_number(i, count);
+            get_number(i.get(), count);
         }
     }
     template <typename T, typename I>
@@ -208,19 +252,17 @@ namespace trie_cpp
     void Trie<T,I>::remove_tree(T *p)
     {
         bool is_end = false;
-        for(auto &i : p->children)
+        for(const auto &i : p->children) // double ref
         {
             if(i->isEndOfWord)
             {
                 is_end = true;
                 break;
             }
-            remove_tree(i);
+            remove_tree(i.get());
         }
         if(is_end)
         {
-            for(auto &i : p->children)
-                delete i;
             p->children.clear();
             p->isEndOfWord = true;
         }
@@ -238,16 +280,14 @@ namespace trie_cpp
     template <typename T, typename I>
     void Trie<T,I>::delete_last()
     {
-        T *p = root;
+        auto p = root.get();
         if(p->children.empty())
             return;
 
         while(!p->children.back()->isEndOfWord)
         {
-            p = p->children.back();
+            p = p->children.back().get();
         }
-
-        delete p->children.back();
         p->children.pop_back();
 
         if(p->children.empty())
