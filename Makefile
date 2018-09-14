@@ -27,7 +27,7 @@ before_release:
 	test -d $(OBJDIR_RELEASE) || mkdir -p $(OBJDIR_RELEASE)
 
 out_release: $(OBJ_RELEASE) $(HEADERS)
-	$(CPP) -o $(TARGET) $(OBJDIR_RELEASE)/*.o 
+	$(CPP) -o $(TARGET) $(OBJDIR_RELEASE)/*.o -fopenmp
 
 $(OBJDIR_RELEASE)/main.o: $(SRCPATH)/main.cpp
 	$(CPP) $(CPPFLAGS) $(SRCPATH)/main.cpp -o $(OBJDIR_RELEASE)/main.o

@@ -22,7 +22,7 @@ int main()
     b4MultipleGrids_VonNeumann(start, grid_sizes, true);
     std::cout << "VonNeumann total time:        " << time_cpp11.elapsed_seconds() << std::endl;
     time_cpp11.reset();
-    b4MultipleGrids_VonNeumann_trie(start, grid_sizes, true);
+    b4MultipleGrids_VonNeumann_trie(start, grid_sizes, true, true, 2);
     std::cout << "VonNeumann total time (trie): " << time_cpp11.elapsed_seconds() << std::endl;
     time_cpp11.reset();
     b4MultipleGrids_Moore(start, grid_sizes, true);

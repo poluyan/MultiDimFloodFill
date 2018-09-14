@@ -24,9 +24,18 @@ void FloodFill_MultipleGrids_VonNeumann_trie(
     const std::vector<double> &dx,
     size_t &counter,
     size_t &fe_count,
-    bool outside_bounds);
+    bool outside_bounds,
+    bool multithread,
+    int thread_number);
 
-void b4MultipleGrids_VonNeumann(const std::vector<double> &init_point, size_t grid_sizes, bool outside_bounds);
-void b4MultipleGrids_VonNeumann_trie(const std::vector<double> &init_point, size_t grid_sizes, bool outside_bounds);
+void b4MultipleGrids_VonNeumann(const std::vector<double> &init_point,
+                                size_t grid_sizes,
+                                bool outside_bounds);
+                                
+void b4MultipleGrids_VonNeumann_trie(const std::vector<double> &init_point,
+                                     size_t grid_sizes,
+                                     bool outside_bounds,
+                                     bool multithread,
+                                     int thread_number);
 
 #endif

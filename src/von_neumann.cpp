@@ -1,6 +1,7 @@
 #include "von_neumann.h"
 #include "print2file.h"
 #include "pdf.h"
+#include <omp.h>
 
 void FloodFill_MultipleGrids_VonNeumann(const std::vector<std::vector<double>> &grids,
                                         std::vector<std::vector<int>> &points,
@@ -42,7 +43,7 @@ void FloodFill_MultipleGrids_VonNeumann(const std::vector<std::vector<double>> &
             {
                 point = t;
                 point[i] = point[i] + 1;
-                
+
                 if(outside_bounds)
                 {
                     if(point[i] < 0)
@@ -59,7 +60,7 @@ void FloodFill_MultipleGrids_VonNeumann(const std::vector<std::vector<double>> &
                     if(point[i] < 0 || point[i] > static_cast<int>(grids[i].size() - 1))
                         continue;
                 }
-                
+
                 points.push_back(point);
             }
             for(size_t i = 0; i != t.size(); i++)
@@ -96,7 +97,9 @@ void FloodFill_MultipleGrids_VonNeumann_trie(const std::vector<std::vector<doubl
         const std::vector<double> &dx,
         size_t &counter,
         size_t &fe_count,
-        bool outside_bounds)
+        bool outside_bounds,
+        bool multithread,
+        int thread_number)
 {
     std::vector<double> dot(grids.size());
 
@@ -177,23 +180,86 @@ void FloodFill_MultipleGrids_VonNeumann_trie(const std::vector<std::vector<doubl
         size_t number_to_points = 0;
         while(!not_coumputed.empty())
         {
-            auto point = not_coumputed.get_and_remove_last();
-            std::vector<double> values(point.size());
-            for(size_t j = 0; j != values.size(); j++)
+            if(!multithread)
             {
-                values[j] = grids[j][point[j]] + dx[j];
-            }
-            bool value = pdf(values);
-            ++fe_count;
+                auto point = not_coumputed.get_and_remove_last();
+                std::vector<double> values(point.size());
+                for(size_t j = 0; j != values.size(); j++)
+                {
+                    values[j] = grids[j][point[j]] + dx[j];
+                }
+                bool value = pdf(values);
+                ++fe_count;
 
-            if(value)
-            {
-                ++number_to_points;
-                points.insert(point);
+                if(value)
+                {
+                    ++number_to_points;
+                    points.insert(point);
+                }
+                else
+                {
+                    visited.insert(point);
+                }
             }
             else
             {
-                visited.insert(point);
+                std::vector<std::pair<std::vector<int>,int>> to_compute;
+                for(size_t i = 0; i != thread_number*100000; i++)
+                {
+                    if(not_coumputed.empty())
+                        break;
+
+                    auto point = not_coumputed.get_and_remove_last();
+                    to_compute.push_back(std::make_pair(point, -1));
+                }
+                int omp_size = to_compute.size();
+                while(omp_size%thread_number)
+                {
+                    omp_size--;
+                }
+
+                //omp_size = 0;
+
+                int th_id;
+                #pragma omp parallel private(th_id)
+                {
+                    th_id = omp_get_thread_num();
+                    if(th_id < thread_number)
+                    {
+                        for(int i = th_id * omp_size / thread_number; i < (th_id + 1) * omp_size / thread_number; ++i)
+                        {
+                            std::vector<double> values(start.size());
+                            for(size_t j = 0; j != values.size(); j++)
+                            {
+                                values[j] = grids[j][to_compute[i].first[j]] + dx[j];
+                            }
+                            to_compute[i].second = pdf(values);
+                        }
+                    }
+                }
+
+                for(size_t i = omp_size; i != to_compute.size(); i++)
+                {
+                    std::vector<double> values(start.size());
+                    for(size_t j = 0; j != values.size(); j++)
+                    {
+                        values[j] = grids[j][to_compute[i].first[j]] + dx[j];
+                    }
+                    to_compute[i].second = pdf(values);
+                }
+
+                for(size_t i = 0; i != to_compute.size(); i++)
+                {
+                    if(to_compute[i].second == 1)
+                    {
+                        points.insert(to_compute[i].first);
+                        ++number_to_points;
+                    }
+                    else if(to_compute[i].second == 0)
+                    {
+                        visited.insert(to_compute[i].first);
+                    }
+                }
             }
         }
         //std::cout << number_to_points << std::endl;
@@ -263,7 +329,9 @@ void b4MultipleGrids_VonNeumann(const std::vector<double> &init_point, size_t gr
     //print2file2d("maps/sample2d.dat", samples);
 }
 
-void b4MultipleGrids_VonNeumann_trie(const std::vector<double> &init_point, size_t grid_sizes, bool outside_bounds)
+void b4MultipleGrids_VonNeumann_trie(const std::vector<double> &init_point, size_t grid_sizes, bool outside_bounds,
+                                     bool multithread,
+                                     int thread_number)
 {
     size_t dim = init_point.size();
 
@@ -313,7 +381,7 @@ void b4MultipleGrids_VonNeumann_trie(const std::vector<double> &init_point, size
     size_t counter = 0;
     size_t fe_count = 0;
 
-    FloodFill_MultipleGrids_VonNeumann_trie(grids, startdot, trie_samples, dx, counter, fe_count, outside_bounds);
+    FloodFill_MultipleGrids_VonNeumann_trie(grids, startdot, trie_samples, dx, counter, fe_count, outside_bounds, multithread, thread_number);
 
     while(!trie_samples.empty())
     {
