@@ -203,14 +203,14 @@ void FloodFill_MultipleGrids_VonNeumann_trie(const std::vector<std::vector<doubl
             }
             else
             {
-                std::vector<std::pair<std::vector<int>,int>> to_compute;
+                std::vector<std::pair<std::vector<int>,bool>> to_compute;
                 for(size_t i = 0; i != thread_number*100000; i++)
                 {
                     if(not_coumputed.empty())
                         break;
 
                     auto point = not_coumputed.get_and_remove_last();
-                    to_compute.push_back(std::make_pair(point, -1));
+                    to_compute.push_back(std::make_pair(point, false));
                 }
                 int omp_size = to_compute.size();
                 while(omp_size%thread_number)
@@ -218,7 +218,7 @@ void FloodFill_MultipleGrids_VonNeumann_trie(const std::vector<std::vector<doubl
                     omp_size--;
                 }
 
-                //omp_size = 0;
+                omp_size = 0;
 
                 int th_id;
                 #pragma omp parallel private(th_id)
@@ -247,6 +247,8 @@ void FloodFill_MultipleGrids_VonNeumann_trie(const std::vector<std::vector<doubl
                     }
                     to_compute[i].second = pdf(values);
                 }
+                
+                fe_count += to_compute.size();
 
                 for(size_t i = 0; i != to_compute.size(); i++)
                 {

@@ -11,7 +11,7 @@
 int main()
 {    
     size_t dim = 3;
-    size_t grid_sizes = 20;
+    size_t grid_sizes = 200;
     
     std::vector<double> start(dim, 0); // std::sqrt(0.5)
     start.front() = -2;
