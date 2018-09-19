@@ -21,8 +21,6 @@ void FloodFill_MultipleGrids_Moore(const std::vector<std::vector<double>> &grids
     }
     std::vector<std::vector<int>> permut = iterate(variable_values);
 
-    std::cout << "hetre" << std::endl;
-
     while(!points.empty())
     {
         auto t = points.back();

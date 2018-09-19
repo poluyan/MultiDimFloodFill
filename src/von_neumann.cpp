@@ -101,15 +101,11 @@ void FloodFill_MultipleGrids_VonNeumann_deque(const std::vector<std::vector<doub
         bool outside_bounds,
         int thread_number)
 {
-    std::set<cell<int,int>> computed;
     std::vector<size_t> index;
     std::vector<double> dot(grids.size());
     std::vector<std::vector<double>> dots;
     while(!points.empty())
     {
-        //auto t = points.front();
-        //points.pop_front();
-
         auto visit_it = visited.find(points.front().dot);
         if(!(visit_it == visited.end()))
         {
@@ -125,18 +121,8 @@ void FloodFill_MultipleGrids_VonNeumann_deque(const std::vector<std::vector<doub
 
             for(size_t i = 0; i < points.size(); i++)
             {
-                auto comp_it = computed.find(points[i]);
-                if(comp_it == computed.end())
-                {
-                    index.push_back(i);
-                }
-                else
-                {
-                    points[i].value = comp_it->value;
-                }
+                index.push_back(i);
             }
-
-            std::cout << index.size() << std::endl;
             dots.resize(index.size());
 
             for(size_t i = 0; i < dots.size(); i++)
@@ -146,14 +132,8 @@ void FloodFill_MultipleGrids_VonNeumann_deque(const std::vector<std::vector<doub
                     dot[j] = grids[j][points[index[i]].dot[j]] + dx[j];
                 }
                 dots[i] = dot;
-                //points[index[i]].value = pdf(dot);
             }
-            /*#pragma omp parallel for
-            for(size_t i = 0; i < index.size(); i++)
-            {
-                points[index[i]].value = Quadratic_ValueSimple3(dots[i], );
-            }*/
-
+            
             int omp_size = index.size();
             while(omp_size%thread_number)
             {
@@ -180,19 +160,13 @@ void FloodFill_MultipleGrids_VonNeumann_deque(const std::vector<std::vector<doub
 
             for(size_t i = 0; i < index.size(); i++)
             {
-                computed.insert(points[index[i]]);
                 fe_count++;
             }
         }
 
-        if(points.front().value > 1.0)
+        if(points.front().value == 1)
         {
-
-            std::vector<int> point = points.front().dot;
-            for(size_t i = 0; i != dot.size(); i++)
-            {
-                dot[i] = grids[i][point[i]] + dx[i];
-            }
+            auto point = points.front().dot;
             samples.push_back(dot);
 
             for(size_t i = 0; i != point.size(); i++)
@@ -208,8 +182,6 @@ void FloodFill_MultipleGrids_VonNeumann_deque(const std::vector<std::vector<doub
                 {
                     points.push_back(cell<int,int>(point, -1));
                 }
-
-                //points.push_back(cell<char,float>(point, -1.0));
             }
             for(size_t i = 0; i != point.size(); i++)
             {
@@ -224,39 +196,10 @@ void FloodFill_MultipleGrids_VonNeumann_deque(const std::vector<std::vector<doub
                 {
                     points.push_back(cell<int,int>(point, -1));
                 }
-
-                //points.push_back(cell<char,float>(point, -1.0));
             }
 
-            /*for(size_t i = 0; i != permut.size(); i++)
-            {
-                point = points.front().dot;
-                bool flag = true;
-                for(size_t j = 0; j != variable_values.size(); j++)
-                {
-                    point[j] = point[j] + permut[i][j];
-                    if(point[j] < 0 || point[j] > grids[j].size() - 1)
-                    {
-                        flag = false;
-                        break;
-                    }
-                }
-                if(!flag)
-                    continue;
-
-                visit_it = visited.find(point);
-                if(visit_it == visited.end())
-                {
-                    points.push_back(cell<char,double>(point, -1.0));
-                }
-            }*/
         }
         points.pop_front();
-
-        //if(samples.size() > 100000)
-        //{
-        //    break;
-        //}
     }
 }
 
