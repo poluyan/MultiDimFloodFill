@@ -91,6 +91,175 @@ void FloodFill_MultipleGrids_VonNeumann(const std::vector<std::vector<double>> &
     }
 }
 
+void FloodFill_MultipleGrids_VonNeumann_deque(const std::vector<std::vector<double>> &grids,
+        std::deque<cell<int, int>> &points,
+        std::set<std::vector<int>> &visited,
+        std::vector<std::vector<double>> &samples,
+        const std::vector<double> &dx,
+        size_t &counter,
+        size_t &fe_count,
+        bool outside_bounds,
+        int thread_number)
+{
+    std::set<cell<int,int>> computed;
+    std::vector<size_t> index;
+    std::vector<double> dot(grids.size());
+    std::vector<std::vector<double>> dots;
+    while(!points.empty())
+    {
+        //auto t = points.front();
+        //points.pop_front();
+
+        auto visit_it = visited.find(points.front().dot);
+        if(!(visit_it == visited.end()))
+        {
+            points.pop_front();
+            continue;
+        }
+        visited.insert(points.front().dot);
+
+        if(points.front().value < 0)
+        {
+            index.clear();
+            dots.clear();
+
+            for(size_t i = 0; i < points.size(); i++)
+            {
+                auto comp_it = computed.find(points[i]);
+                if(comp_it == computed.end())
+                {
+                    index.push_back(i);
+                }
+                else
+                {
+                    points[i].value = comp_it->value;
+                }
+            }
+
+            std::cout << index.size() << std::endl;
+            dots.resize(index.size());
+
+            for(size_t i = 0; i < dots.size(); i++)
+            {
+                for(size_t j = 0; j != dot.size(); j++)
+                {
+                    dot[j] = grids[j][points[index[i]].dot[j]] + dx[j];
+                }
+                dots[i] = dot;
+                //points[index[i]].value = pdf(dot);
+            }
+            /*#pragma omp parallel for
+            for(size_t i = 0; i < index.size(); i++)
+            {
+                points[index[i]].value = Quadratic_ValueSimple3(dots[i], );
+            }*/
+
+            int omp_size = index.size();
+            while(omp_size%thread_number)
+            {
+                omp_size--;
+            }
+
+            int th_id;
+            #pragma omp parallel private(th_id)
+            {
+                th_id = omp_get_thread_num();
+                if(th_id < thread_number)
+                {
+                    for(int i = th_id * omp_size / thread_number; i < (th_id + 1) * omp_size / thread_number; ++i)
+                    {
+                        points[index[i]].value = pdf(dots[i]);
+                    }
+                }
+            }
+
+            for(size_t i = omp_size; i != index.size(); i++)
+            {
+                points[index[i]].value = pdf(dots[i]);
+            }
+
+            for(size_t i = 0; i < index.size(); i++)
+            {
+                computed.insert(points[index[i]]);
+                fe_count++;
+            }
+        }
+
+        if(points.front().value > 1.0)
+        {
+
+            std::vector<int> point = points.front().dot;
+            for(size_t i = 0; i != dot.size(); i++)
+            {
+                dot[i] = grids[i][point[i]] + dx[i];
+            }
+            samples.push_back(dot);
+
+            for(size_t i = 0; i != point.size(); i++)
+            {
+                point = points.front().dot;
+                point[i] = point[i] + 1;
+
+                if(point[i] < 0 || point[i] > grids[i].size() - 1)
+                    continue;
+
+                visit_it = visited.find(point);
+                if(visit_it == visited.end())
+                {
+                    points.push_back(cell<int,int>(point, -1));
+                }
+
+                //points.push_back(cell<char,float>(point, -1.0));
+            }
+            for(size_t i = 0; i != point.size(); i++)
+            {
+                point = points.front().dot;
+                point[i] = point[i] - 1;
+
+                if(point[i] < 0 || point[i] > grids[i].size() - 1)
+                    continue;
+
+                visit_it = visited.find(point);
+                if(visit_it == visited.end())
+                {
+                    points.push_back(cell<int,int>(point, -1));
+                }
+
+                //points.push_back(cell<char,float>(point, -1.0));
+            }
+
+            /*for(size_t i = 0; i != permut.size(); i++)
+            {
+                point = points.front().dot;
+                bool flag = true;
+                for(size_t j = 0; j != variable_values.size(); j++)
+                {
+                    point[j] = point[j] + permut[i][j];
+                    if(point[j] < 0 || point[j] > grids[j].size() - 1)
+                    {
+                        flag = false;
+                        break;
+                    }
+                }
+                if(!flag)
+                    continue;
+
+                visit_it = visited.find(point);
+                if(visit_it == visited.end())
+                {
+                    points.push_back(cell<char,double>(point, -1.0));
+                }
+            }*/
+        }
+        points.pop_front();
+
+        //if(samples.size() > 100000)
+        //{
+        //    break;
+        //}
+    }
+}
+
 void FloodFill_MultipleGrids_VonNeumann_trie(const std::vector<std::vector<double>> &grids,
         std::vector<int> &start,
         trie_cpp::Trie<trie_cpp::Node<int>,int> &samples,
@@ -247,7 +416,7 @@ void FloodFill_MultipleGrids_VonNeumann_trie(const std::vector<std::vector<doubl
                     }
                     to_compute[i].second = pdf(values);
                 }
-                
+
                 fe_count += to_compute.size();
 
                 for(size_t i = 0; i != to_compute.size(); i++)
@@ -322,6 +491,65 @@ void b4MultipleGrids_VonNeumann(const std::vector<double> &init_point, size_t gr
     size_t fe_count = 0;
 
     FloodFill_MultipleGrids_VonNeumann(grids, points, visited, samples, dx, counter, fe_count, outside_bounds);
+
+    std::cout << counter << std::endl;
+    std::cout << "fe count: " << fe_count << std::endl;
+    std::cout << "samples: " << samples.size() << std::endl;
+    std::cout << samples.size()/double(fe_count) << std::endl;
+
+    //print2file2d("maps/sample2d.dat", samples);
+}
+
+void b4MultipleGrids_VonNeumann_deque(const std::vector<double> &init_point, size_t grid_sizes, bool outside_bounds, int thread_number)
+{
+    size_t dim = init_point.size();
+
+    std::vector<double> grid(dim, grid_sizes);
+    std::vector<std::vector<double>> grids(grid.size());
+    std::vector<double> dx(grid.size());
+
+    double lb = -3, ub = 3;
+    for(size_t i = 0; i != grids.size(); i++)
+    {
+        size_t num_points = grid[i];
+        std::vector<double> onegrid(num_points);
+        double startp = lb;
+        double endp = ub;
+        double es = endp - startp;
+        for(size_t j = 0; j != onegrid.size(); j++)
+        {
+            onegrid[j] = startp + j*es/(num_points);
+        }
+        grids[i] = onegrid;
+        dx[i] = es/(num_points*2);
+    }
+
+    // finding start dot over created grid
+    std::vector<int> startdot(init_point.size());
+    for(size_t i = 0; i != startdot.size(); i++)
+    {
+        std::vector<double> val(grids[i].size());
+        for(size_t j = 0; j != val.size(); j++)
+        {
+            val[j] = grids[i][j] + dx[i];
+        }
+        auto pos1 = std::lower_bound(val.begin(), val.end(), init_point[i]);
+        startdot[i] = std::distance(val.begin(), pos1) - 1;
+    }
+
+    std::deque<cell<int,int>> points;
+    std::vector<std::vector<int>> boundary;
+
+    points.push_back(cell<int,int>(startdot,-1));
+
+    std::set<std::vector<int>> visited;
+
+    std::vector<std::vector<double> > samples;
+
+    size_t counter = 0;
+    size_t fe_count = 0;
+
+    FloodFill_MultipleGrids_VonNeumann_deque(grids, points, visited, samples, dx, counter, fe_count, outside_bounds, thread_number);
 
     std::cout << counter << std::endl;
     std::cout << "fe count: " << fe_count << std::endl;
